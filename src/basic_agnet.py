@@ -3,7 +3,7 @@ from smolagents import CodeAgent, TransformersModel
 
 model = TransformersModel(
     model_id="Qwen/Qwen3-4B",
-    device_map="auto",
+    device_map="cuda",
     torch_dtype="auto",
     max_new_tokens=1024,
 )
