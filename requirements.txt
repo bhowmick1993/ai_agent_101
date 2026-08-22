@@ -8,3 +8,7 @@ python-dotenv
 langchainhub
 certifi
 huggingface_hub
+rich
+bs4
+readability-lxml
+trafilatura
