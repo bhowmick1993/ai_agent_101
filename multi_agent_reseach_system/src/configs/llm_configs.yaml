@@ -1,0 +1,19 @@
+google_gemma:
+  model_id: google/gemma-3-4b-it
+  max_tokens: 2048
+
+microsoft_phi:
+  model_id: microsoft/Phi-4-mini-instruct
+  max_tokens: 2048
+
+meta_llama:
+  model_id: meta-llama/Llama-3.1-8B-Instruct
+  max_tokens: 2048  
+
+ibm_granite:
+  model_id: ibm-granite/granite-3.3-8b-instruct
+  max_tokens: 2048
+
+qwen:
+  model_id: Qwen/Qwen3-4B
+  max_tokens: 2048

@@ -1,5 +1,6 @@
-# Web search tool
-
+"""
+Tools for web search and content scraping.
+"""
 import os
 import requests
 from rich import print
@@ -27,7 +28,7 @@ def search_web(query: str) -> str:
         str: The search results.
     """
     try:
-        response = tavily.search(query, max_results=2, search_depth="basic")
+        response = tavily.search(query, max_results=5)
         results = response.get("results", [])
         if not results:
             return "No results found."
@@ -35,13 +36,9 @@ def search_web(query: str) -> str:
         for result in results:
             #out.append(f"Title: {result.get('title', 'N/A')}\nURL: {result.get('url', 'N/A')}\nContent: {result.get('content', 'N/A')}\n")
             out.append(
-                {
-                    "Title": result.get("title", "N/A"),
-                    "URL": result.get("url", "N/A"),
-                    "Content": result.get("content", "N/A")
-                }
+            f"Title: {result.get('title', 'N/A')}\nURL: {result.get('url', 'N/A')}\nSnippet: {result.get('content', 'N/A')[:300]}\n"
             )
-        return out
+        return "\n----\n".join(out)
     except Exception as e:
         return f"An error occurred while searching the web: {str(e)}"
 
