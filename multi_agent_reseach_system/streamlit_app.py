@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import streamlit as st
+import yaml
+from pathlib import Path
 
 from src.agents.agents import (
+    create_llm,
     build_search_agent,
     build_reader_agent,
-    writer_chain,
-    critic_chain,
+    build_writer_chain,
+    build_critic_chain,
 )
 
 
@@ -151,6 +154,20 @@ def extract_text(result):
     return str(result)
 
 
+def load_llm_configs():
+    """
+    Load LLM configurations from the YAML file.
+    """
+    config_path = Path(__file__).parent / "src" / "configs" / "llm_configs.yaml"
+    
+    try:
+        with open(config_path, "r") as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        st.error(f"Failed to load LLM configs: {e}")
+        return {}
+
+
 def initialize_session_state():
 
     defaults = {
@@ -160,6 +177,7 @@ def initialize_session_state():
         "report": "",
         "feedback": "",
         "research_complete": False,
+        "selected_llm": "google_gemma",
     }
 
     for key, value in defaults.items():
@@ -196,6 +214,34 @@ with st.sidebar:
         Configure and launch the multi-agent research pipeline.
         """
     )
+
+    st.divider()
+
+    # LLM Configuration
+    st.markdown("### LLM Model Selection")
+    
+    llm_configs = load_llm_configs()
+    
+    if llm_configs:
+        llm_options = list(llm_configs.keys())
+        
+        selected_llm = st.selectbox(
+            "Choose LLM Model",
+            options=llm_options,
+            index=llm_options.index(st.session_state.selected_llm) if st.session_state.selected_llm in llm_options else 0,
+            help="Select the language model to use for all agents.",
+        )
+        
+        st.session_state.selected_llm = selected_llm
+        
+        # Display selected model info
+        if selected_llm in llm_configs:
+            st.info(
+                f"**Model ID:** {llm_configs[selected_llm]['model_id']}\n\n"
+                f"**Max Tokens:** {llm_configs[selected_llm]['max_tokens']}"
+            )
+    else:
+        st.error("No LLM configurations available.")
 
     st.divider()
 
@@ -361,6 +407,28 @@ if start_research:
         try:
 
             # ==================================================
+            # CREATE LLM INSTANCE
+            # ==================================================
+            
+            llm_configs = load_llm_configs()
+            
+            if not llm_configs or st.session_state.selected_llm not in llm_configs:
+                st.error("Invalid LLM configuration selected.")
+                st.stop()
+            
+            llm_config = llm_configs[st.session_state.selected_llm]
+            
+            overall_status.write(
+                f"🤖 **Initializing LLM:** {llm_config['model_id']}..."
+            )
+            
+            llm = create_llm(**llm_config)
+            
+            overall_status.write(
+                "✅ LLM initialized successfully."
+            )
+
+            # ==================================================
             # STEP 1 — SEARCH AGENT
             # ==================================================
 
@@ -368,7 +436,7 @@ if start_research:
                 "🔎 **Step 1/4 — Search Agent:** finding relevant information..."
             )
 
-            search_agent = build_search_agent()
+            search_agent = build_search_agent(llm)
 
             search_results = search_agent.invoke(
                 {
@@ -403,7 +471,7 @@ if start_research:
                 "📖 **Step 2/4 — Reader Agent:** selecting and reading a source..."
             )
 
-            reader_agent = build_reader_agent()
+            reader_agent = build_reader_agent(llm)
 
             reader_prompt = (
                 f"Based on the following search results about '{topic}', "
@@ -449,6 +517,8 @@ if start_research:
                 f"{scraped_text}"
             )
 
+            writer_chain = build_writer_chain(llm)
+            
             report_result = writer_chain.invoke(
                 {
                     "topic": topic,
@@ -475,6 +545,8 @@ if start_research:
                 "🧠 **Step 4/4 — Critic Agent:** reviewing report quality..."
             )
 
+            critic_chain = build_critic_chain(llm)
+            
             critique_result = critic_chain.invoke(
                 {
                     "report": report_text
