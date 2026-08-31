@@ -14,6 +14,7 @@ load_dotenv()
 # Model Setup
 # ------------------------------------------------------
 def create_llm(
+        provider: str,
         model_id: str,
         max_tokens: int = 2048,
 

@@ -1,3 +1,22 @@
+# Disclaimer
+This is a learning project exploring agentic AI concepts with LangChain. The current implementation uses a mostly sequential orchestration pipeline; future versions will explore LangGraph-based dynamic routing and multi-agent collaboration.
+
+## Roadmap
+
+- [x] Web-search agent
+- [x] Web-content reader agent
+- [x] Research writer chain
+- [x] Critic chain
+- [x] Local Hugging Face LLM support
+- [x] Streamlit interface
+- [ ] LangGraph orchestration
+- [ ] Parallel research agents
+- [ ] Writer ↔ Critic revision loop
+- [ ] Citation verification
+- [ ] Agent evaluation benchmark
+- [ ] LangSmith tracing
+
+
 # Multi-Agent Research System
 
 A local, multi-agent research pipeline that takes any topic, searches the web, scrapes the most relevant page, writes a structured research report, and critiques it — all powered by open-source LLMs running on your own hardware via HuggingFace.
@@ -59,6 +78,8 @@ multi_agent_reseach_system/
 │   │   └── pipeline.py         # Orchestrates the four-step pipeline
 │   └── tools/
 │       └── tools.py            # search_web and scrape_url LangChain tools
+|-- example_output/             # Conatins some researched outputs as .md files
+|-- sample_app_images/          # Some images from the streamlit app
 ```
 
 ---
